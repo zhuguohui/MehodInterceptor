@@ -12,9 +12,9 @@ repositories {
 }
 
 
-def group='com.zgh.jg' //组
+def group='com.zhuguohui.util' //组
 def version='1.0.0' //版本
-def artifactId='JGPlugin' //唯一标示
+def artifactId='MethodInterceptor' //唯一标示
 
 
 //将插件打包上传到本地maven仓库
