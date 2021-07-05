@@ -263,7 +263,7 @@ public class MIMethodVisitor2 extends MethodVisitor {
             methodVisitor.visitTypeInsn(NEW, "java/lang/StringBuilder");
             methodVisitor.visitInsn(DUP);
             methodVisitor.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-            methodVisitor.visitLdcInsn("don't fond method  [");
+            methodVisitor.visitLdcInsn("don't find method  [");
             methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
             methodVisitor.visitVarInsn(ALOAD, 2 + i);
             methodVisitor.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
