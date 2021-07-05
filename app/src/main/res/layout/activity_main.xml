@@ -33,5 +33,12 @@
             android:layout_height="wrap_content"
             android:text="删除（提醒+登录)"
             />
+        <Button
+            android:layout_marginTop="10dp"
+            android:id="@+id/tv_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="分享（权限)"
+            />
     </LinearLayout>
 </RelativeLayout>

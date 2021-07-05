@@ -1,7 +1,9 @@
 package com.example.zghplugin.jg;
 
 import com.example.zghplugin.extension.MethodInterceptorConfig;
+import com.google.gson.JsonObject;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
@@ -9,6 +11,7 @@ import org.objectweb.asm.Handle;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.TypePath;
 
 
 import static org.objectweb.asm.Opcodes.*;
@@ -63,17 +66,17 @@ public class MIMethodVisitor2 extends MethodVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         System.out.println("visitAnnotation desc=" + desc);
-        if (jgAnnotationVisitor==null&&miConfig.handlers.keySet().contains(desc)) {
+        if (jgAnnotationVisitor == null && miConfig.handlers.keySet().contains(desc)) {
             //如果jgAnnotationVisitor 不等于空，表示已经有一个methodInter需要处理了。
             if (this.desc != null) {
                 String[] split = this.desc.split(";");
                 methodArgNumber = split.length - 1;
             }
-            jgAnnotationVisitor = new JGAnnotationVisitor(desc);
+            jgAnnotationVisitor = new JGAnnotationVisitor(desc, miConfig);
             //创建修改原有方法的名字
             replaceMethodName = "_" + jgAnnotationVisitor.simpleName + "_index" + methodIndex + "_" + name;
             replaceMethodVisitor = classWriter.visitMethod(ACC_PRIVATE, replaceMethodName, this.desc, signature, exceptions);
-            replaceMethodVisitor=new MIMethodVisitor2(classWriter,replaceMethodVisitor,replaceMethodName,this.signature,this.exceptions,this.desc,miConfig);
+            replaceMethodVisitor = new MIMethodVisitor2(classWriter, replaceMethodVisitor, replaceMethodName, this.signature, this.exceptions, this.desc, miConfig);
             return jgAnnotationVisitor;
         }
         AnnotationVisitor annotationVisitor = super.visitAnnotation(desc, visible);
@@ -89,6 +92,13 @@ public class MIMethodVisitor2 extends MethodVisitor {
         }
     }
 
+    private static class EmptyAnnotationVisitor extends AnnotationVisitor {
+
+        public EmptyAnnotationVisitor() {
+            super(Opcodes.ASM5, null);
+        }
+    }
+
     private static class CopyAnnotationVisitor extends AnnotationVisitor {
 
         AnnotationVisitor copyAV;
@@ -96,6 +106,9 @@ public class MIMethodVisitor2 extends MethodVisitor {
         public CopyAnnotationVisitor(AnnotationVisitor av, AnnotationVisitor copyAV) {
             super(Opcodes.ASM5, av);
             this.copyAV = copyAV;
+         /*   if (copyAV == null) {
+                this.copyAV = new EmptyAnnotationVisitor();
+            }*/
         }
 
         @Override
@@ -137,6 +150,70 @@ public class MIMethodVisitor2 extends MethodVisitor {
             super.visitEnd();
             copyAV.visitEnd();
         }
+    }
+
+    @Override
+    public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
+        AnnotationVisitor annotationVisitor = super.visitParameterAnnotation(parameter, desc, visible);
+        if (annotationVisitor != null) {
+            AnnotationVisitor copy = replaceMethodVisitor.visitParameterAnnotation(parameter, desc, visible);
+            return new CopyAnnotationVisitor(annotationVisitor, copy);
+        }
+        return null;
+    }
+
+    @Override
+    public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+        AnnotationVisitor annotationVisitor = super.visitInsnAnnotation(typeRef, typePath, desc, visible);
+        if (annotationVisitor != null) {
+            AnnotationVisitor copy = replaceMethodVisitor.visitInsnAnnotation(typeRef, typePath, desc, visible);
+            return new CopyAnnotationVisitor(annotationVisitor, copy);
+        }
+        return null;
+    }
+
+    @Override
+    public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end, int[] index, String desc, boolean visible) {
+        AnnotationVisitor annotationVisitor = super.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, desc, visible);
+        if (annotationVisitor != null) {
+            AnnotationVisitor copy = replaceMethodVisitor.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, desc, visible);
+            return new CopyAnnotationVisitor(annotationVisitor, copy);
+        }
+        return null;
+    }
+
+    boolean callVisitAnnotationDefault=false;
+
+    @Override
+    public AnnotationVisitor visitAnnotationDefault() {
+      /*  AnnotationVisitor annotationVisitor = super.visitAnnotationDefault();
+        if (annotationVisitor != null) {
+            AnnotationVisitor copy = replaceMethodVisitor.visitAnnotationDefault();
+            if(copy!=null) {
+                return new CopyAnnotationVisitor(annotationVisitor, copy);
+            }
+        }*/
+        return null;
+    }
+
+    @Override
+    public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+        AnnotationVisitor annotationVisitor = super.visitTryCatchAnnotation(typeRef, typePath, desc, visible);
+        if (annotationVisitor != null) {
+            AnnotationVisitor copy = replaceMethodVisitor.visitTryCatchAnnotation(typeRef, typePath, desc, visible);
+            return new CopyAnnotationVisitor(annotationVisitor, copy);
+        }
+        return null;
+    }
+
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+        AnnotationVisitor annotationVisitor = super.visitTypeAnnotation(typeRef, typePath, desc, visible);
+        if (annotationVisitor != null) {
+            AnnotationVisitor copy = replaceMethodVisitor.visitTypeAnnotation(typeRef, typePath, desc, visible);
+            return new CopyAnnotationVisitor(annotationVisitor, copy);
+        }
+        return null;
     }
 
 
@@ -507,16 +584,18 @@ public class MIMethodVisitor2 extends MethodVisitor {
     }
 
 
-    private class JGAnnotationVisitor extends AnnotationVisitor {
+    private static class JGAnnotationVisitor extends AnnotationVisitor {
 
 
         JSONObject jsonObject = new JSONObject();
 
         String simpleName;
         String processName;
+        MethodInterceptorConfig miConfig;
 
-        public JGAnnotationVisitor(String desc) {
+        public JGAnnotationVisitor(String desc, MethodInterceptorConfig miConfig) {
             super(Opcodes.ASM5);
+            this.miConfig = miConfig;
             simpleName = desc.substring(desc.lastIndexOf("/") + 1, desc.length() - 1).toLowerCase();
             processName = miConfig.handlers.get(desc);
         }
@@ -528,9 +607,45 @@ public class MIMethodVisitor2 extends MethodVisitor {
             jsonObject.put(name, value.toString());
         }
 
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return new ArrayAnnotationVisitor(name, jsonObject);
+        }
+
         public String getInfo() {
             String info = jsonObject.toJSONString();
             return info;
+        }
+    }
+
+    private static class ArrayAnnotationVisitor extends AnnotationVisitor {
+        JSONObject jsonObject;
+        JSONArray array;
+        String name;
+
+        public ArrayAnnotationVisitor(String name, JSONObject jsonObject) {
+            super(Opcodes.ASM5);
+            this.jsonObject = jsonObject;
+            this.name = name;
+            this.array = new JSONArray();
+        }
+
+        @Override
+        public void visit(String name, Object value) {
+            super.visit(name, value);
+            array.add(value.toString());
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return super.visitArray(name);
+        }
+
+        @Override
+        public void visitEnd() {
+            super.visitEnd();
+            jsonObject.put(name, array);
         }
     }
 

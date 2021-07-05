@@ -1,4 +1,4 @@
-package com.example.myapplication.handler.confirm;
+package com.example.myapplication.handler.permission;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
-public @interface Confirm {
-    String value();
+public @interface RequestPermission {
+    String[] value();
 }

@@ -12,7 +12,11 @@ methodInterceptor {
             //处理提醒
             "com.example.myapplication.handler.confirm.Confirm":"com.example.myapplication.handler.confirm.ConfirmUtil",
             //处理登录
-            "com.example.myapplication.handler.login.LoginRequest":"com.example.myapplication.handler.login.LoginRequestHandler"]
+            "com.example.myapplication.handler.login.RequestLogin":"com.example.myapplication.handler.login.LoginRequestHandler",
+            //处理权限
+           "com.example.myapplication.handler.permission.RequestPermission":"com.example.myapplication.handler.permission.PermissionRequestHandler",
+            //test
+           "com.example.myapplication.handler.test.Test":"com.example.myapplication.handler.test.TestHandler"]
 }
 
 
@@ -53,7 +57,11 @@ dependencies {
     implementation 'org.ow2.asm:asm:5.0.3'
     implementation 'org.ow2.asm:asm-commons:5.0.3'
 
-   // gson
+    //gson
     implementation 'com.google.code.gson:gson:2.2.4'
+
+    //rxPermission
+    compile 'io.reactivex.rxjava2:rxjava:2.0.1'
+    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
 }
 
