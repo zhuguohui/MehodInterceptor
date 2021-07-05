@@ -76,7 +76,7 @@ public class MIMethodVisitor2 extends MethodVisitor {
             //创建修改原有方法的名字
             replaceMethodName = "_" + jgAnnotationVisitor.simpleName + "_index" + methodIndex + "_" + name;
             replaceMethodVisitor = classWriter.visitMethod(ACC_PRIVATE, replaceMethodName, this.desc, signature, exceptions);
-            replaceMethodVisitor = new MIMethodVisitor2(classWriter, replaceMethodVisitor, replaceMethodName, this.signature, this.exceptions, this.desc, miConfig);
+       //     replaceMethodVisitor = new MIMethodVisitor2(classWriter, replaceMethodVisitor, replaceMethodName, this.signature, this.exceptions, this.desc, miConfig);
             return jgAnnotationVisitor;
         }
         AnnotationVisitor annotationVisitor = super.visitAnnotation(desc, visible);

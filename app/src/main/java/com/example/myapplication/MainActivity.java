@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        findViewById(R.id.tv_btn).setOnClickListener(v -> {
+        findViewById(R.id.tv_commit).setOnClickListener(v -> {
             commit(MainActivity.this);
         });
 
@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     @Confirm(value = "确定执行提交操作")
     public void commit(Context context) {
         Toast.makeText(context, "签发成功", Toast.LENGTH_SHORT).show();
@@ -47,17 +46,12 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(context, "评论成功", Toast.LENGTH_SHORT).show();
     }
 
-  //  @RequestPermission( {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION})
-    @Confirm("确定执行删除操作")
-    @RequestLogin
-   // @Test("aa")
-  //  @RequestPermission( {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION})
+    @RequestPermission( {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION})
     public void delete(Context context) {
         Toast.makeText(context, "删除成功", Toast.LENGTH_SHORT).show();
     }
 
- //   @Confirm("确定执行删除操作")
- //   @Confirm("")
+    @Confirm("确定执行分享操作")
     @RequestLogin
     @RequestPermission( {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION})
     public void share(Context context) {

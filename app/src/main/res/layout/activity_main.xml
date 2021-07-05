@@ -14,7 +14,7 @@
 
         <Button
             android:layout_marginTop="10dp"
-            android:id="@+id/tv_btn"
+            android:id="@+id/tv_commit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="提交(需要确认)"
@@ -31,14 +31,14 @@
             android:id="@+id/tv_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="删除（提醒+登录)"
+            android:text="删除（权限)"
             />
         <Button
             android:layout_marginTop="10dp"
             android:id="@+id/tv_share"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="分享（权限)"
+            android:text="分享（提醒，登录，权限)"
             />
     </LinearLayout>
 </RelativeLayout>

@@ -1,10 +1,7 @@
 package com.example.myapplication.handler.login;
 
 import android.content.Context;
-import android.content.Intent;
 import android.widget.Toast;
-
-import com.example.myapplication.LoginActivity;
 
 import java.lang.reflect.Method;
 
@@ -28,8 +25,20 @@ public class LoginRequestHandler {
             }
         } else {
             Toast.makeText(context, "请登录", Toast.LENGTH_SHORT).show();
-            context.startActivity(new Intent(context, LoginActivity.class));
+           LoginConfig.requestLogin(context, () -> {
+               if(LoginConfig.haveLogin){
+                   try {
+                       method.setAccessible(true);
+                       method.invoke(caller, objects);
+                   } catch (Exception e) {
+                       e.printStackTrace();
+                   }
+               }else {
+                   Toast.makeText(context, "用户取消登录", Toast.LENGTH_SHORT).show();
+               }
+           });
         }
+
 
     }
 

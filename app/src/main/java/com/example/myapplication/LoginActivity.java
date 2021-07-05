@@ -17,4 +17,10 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         });
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LoginConfig.onStateChange();
+    }
 }
