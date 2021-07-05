@@ -4,7 +4,8 @@ import com.android.annotations.NonNull
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.example.zghplugin.jg.JGClassVisitor
+import com.example.zghplugin.extension.MethodInterceptorConfig
+import com.example.zghplugin.jg.MIClassVisitor
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
@@ -13,7 +14,6 @@ import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.tree.ClassNode
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -22,18 +22,21 @@ import java.util.zip.ZipEntry
 
 import static org.objectweb.asm.ClassReader.EXPAND_FRAMES
 
-class JGPlugin extends Transform implements Plugin<Project> {
+class MethodInterceptorPlugin extends Transform implements Plugin<Project> {
+    MethodInterceptorConfig MIConfig;
+
 
     @Override
     void apply(Project project) {
         //registerTransform
         def android = project.extensions.getByType(AppExtension)
         android.registerTransform(this)
+        MIConfig = project.extensions.create("methodInterceptor", MethodInterceptorConfig.class)
     }
 
     @Override
     String getName() {
-        return "ZGHPlugin"
+        return "MethodInterceptorPlugin"
     }
 
     @Override
@@ -57,6 +60,7 @@ class JGPlugin extends Transform implements Plugin<Project> {
         def startTime = System.currentTimeMillis()
         Collection<TransformInput> inputs = transformInvocation.inputs
         TransformOutputProvider outputProvider = transformInvocation.outputProvider
+        MIConfig.change();
         //删除之前的输出
         if (outputProvider != null)
             outputProvider.deleteAll()
@@ -80,7 +84,7 @@ class JGPlugin extends Transform implements Plugin<Project> {
     /**
      * 处理文件目录下的class文件
      */
-    static void handleDirectoryInput(DirectoryInput directoryInput, TransformOutputProvider outputProvider) {
+     void handleDirectoryInput(DirectoryInput directoryInput, TransformOutputProvider outputProvider) {
         //是否是目录
         if (directoryInput.file.isDirectory()) {
             //列出目录所有文件（包含子文件夹，子文件夹内文件）
@@ -88,14 +92,9 @@ class JGPlugin extends Transform implements Plugin<Project> {
                 def name = file.name
                 if (checkClassFile(file.getPath())) {
                     println '----------- deal with "class" file <' + name + '> -----------'
-                    ClassReader classReader0 = new ClassReader(file.bytes)
-                    ClassNode classNode=new ClassNode();
-                    classReader0.accept(classNode,0);
-
-
                     ClassReader classReader = new ClassReader(file.bytes)
                     ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
-                    ClassVisitor cv = new JGClassVisitor(classReader,classWriter,classNode)
+                    ClassVisitor cv = new MIClassVisitor( classWriter, MIConfig)
                     classReader.accept(cv, EXPAND_FRAMES)
                     byte[] code = classWriter.toByteArray()
                     FileOutputStream fos = new FileOutputStream(
@@ -172,13 +171,21 @@ class JGPlugin extends Transform implements Plugin<Project> {
      * @param fileName
      * @return
      */
-    static boolean checkClassFile(String name) {
+    boolean checkClassFile(String name) {
         if (!name.endsWith("class")) {
             return false;
         }
-        println '----------- check class file  > ' + name + ' < -----------'
+        if (MIConfig.include == null || MIConfig.include.size() == 0) {
+            return;
+        }
+        for (String packName : MIConfig.include) {
+            if (name.concat(packName)) {
+                return true;
+            }
+        }
+       // println '----------- check class file  > ' + name + ' < -----------'
         //只处理需要的class文件
-        return (name.concat("MainActivity"))
+        return false;
     }
 
 }

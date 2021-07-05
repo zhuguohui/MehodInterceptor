@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.lang.reflect.Method;
+import com.example.myapplication.handler.Confirm;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     @Test("zzz")
     public   void test2(Context context) {
         Toast.makeText(context, "签发成功", Toast.LENGTH_SHORT).show();
-        throw new RuntimeException("测试崩溃");
+//        throw new RuntimeException("测试崩溃");
     }
 
 

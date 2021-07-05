@@ -1,8 +1,16 @@
 
 plugins {
     id 'com.android.application'
+
 }
-apply plugin:"com.zgh.jg"
+
+apply plugin:"com.zhuguohui.methodinterceptor"
+
+methodInterceptor {
+    include= ["com.example.myapplication"]
+    handlers= ["com.example.myapplication.handler.Confirm":"com.example.myapplication.handler.ConfirmUtil"]
+}
+
 
 
 android {

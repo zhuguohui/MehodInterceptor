@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.handler;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
 public class ConfirmUtil {
 
 
-    public static void doConfirm(String info, Object caller, Method method, Object... objects) {
+    public static void onMethodIntercepted(String info, Object caller, Method method, Object... objects) {
         Context context = (Context) caller;
         new AlertDialog.Builder(context)
                 .setTitle(info)
@@ -41,7 +41,7 @@ public class ConfirmUtil {
     }
 
 
-    public static void callError(Object caller,Exception e){
+    public static void onMethodInterceptedError(Object caller,Exception e){
         e.printStackTrace();
         Toast.makeText((Context) caller,"处理注解失败:"+e.getMessage(),Toast.LENGTH_SHORT).show();
     }
