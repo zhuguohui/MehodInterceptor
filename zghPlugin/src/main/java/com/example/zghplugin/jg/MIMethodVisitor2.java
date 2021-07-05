@@ -63,7 +63,8 @@ public class MIMethodVisitor2 extends MethodVisitor {
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         System.out.println("visitAnnotation desc=" + desc);
-        if (miConfig.handlers.keySet().contains(desc)) {
+        if (jgAnnotationVisitor==null&&miConfig.handlers.keySet().contains(desc)) {
+            //如果jgAnnotationVisitor 不等于空，表示已经有一个methodInter需要处理了。
             if (this.desc != null) {
                 String[] split = this.desc.split(";");
                 methodArgNumber = split.length - 1;
@@ -72,6 +73,7 @@ public class MIMethodVisitor2 extends MethodVisitor {
             //创建修改原有方法的名字
             replaceMethodName = "_" + jgAnnotationVisitor.simpleName + "_index" + methodIndex + "_" + name;
             replaceMethodVisitor = classWriter.visitMethod(ACC_PRIVATE, replaceMethodName, this.desc, signature, exceptions);
+            replaceMethodVisitor=new MIMethodVisitor2(classWriter,replaceMethodVisitor,replaceMethodName,this.signature,this.exceptions,this.desc,miConfig);
             return jgAnnotationVisitor;
         }
         AnnotationVisitor annotationVisitor = super.visitAnnotation(desc, visible);
@@ -128,6 +130,12 @@ public class MIMethodVisitor2 extends MethodVisitor {
             } else {
                 return null;
             }
+        }
+
+        @Override
+        public void visitEnd() {
+            super.visitEnd();
+            copyAV.visitEnd();
         }
     }
 

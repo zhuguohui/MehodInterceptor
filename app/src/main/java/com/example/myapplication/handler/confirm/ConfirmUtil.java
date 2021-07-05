@@ -1,10 +1,12 @@
-package com.example.myapplication.handler;
+package com.example.myapplication.handler.confirm;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+
+import com.google.gson.Gson;
 
 import java.lang.reflect.Method;
 
@@ -16,11 +18,33 @@ import java.lang.reflect.Method;
  */
 public class ConfirmUtil {
 
+  static class ConfirmValue{
+      String value;
+      boolean showToast;
 
-    public static void onMethodIntercepted(String info, Object caller, Method method, Object... objects) {
+      public String getValue() {
+          return value;
+      }
+
+      public void setValue(String value) {
+          this.value = value;
+      }
+
+      public boolean isShowToast() {
+          return showToast;
+      }
+
+      public void setShowToast(boolean showToast) {
+          this.showToast = showToast;
+      }
+  }
+
+    public static void onMethodIntercepted(String annotationJson, Object caller, Method method, Object... objects) {
+
         Context context = (Context) caller;
+        ConfirmValue cv=new Gson().fromJson(annotationJson,ConfirmValue.class);
         new AlertDialog.Builder(context)
-                .setTitle(info)
+                .setTitle(cv.value)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

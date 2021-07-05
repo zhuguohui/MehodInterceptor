@@ -8,7 +8,11 @@ apply plugin:"com.zhuguohui.methodinterceptor"
 
 methodInterceptor {
     include= ["com.example.myapplication"]
-    handlers= ["com.example.myapplication.handler.Confirm":"com.example.myapplication.handler.ConfirmUtil"]
+    handlers= [
+            //处理提醒
+            "com.example.myapplication.handler.confirm.Confirm":"com.example.myapplication.handler.confirm.ConfirmUtil",
+            //处理登录
+            "com.example.myapplication.handler.login.LoginRequest":"com.example.myapplication.handler.login.LoginRequestHandler"]
 }
 
 
@@ -48,5 +52,8 @@ dependencies {
     //asm
     implementation 'org.ow2.asm:asm:5.0.3'
     implementation 'org.ow2.asm:asm-commons:5.0.3'
+
+   // gson
+    implementation 'com.google.code.gson:gson:2.2.4'
 }
 

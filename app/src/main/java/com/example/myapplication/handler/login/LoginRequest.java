@@ -1,4 +1,4 @@
-package com.example.myapplication.handler;
+package com.example.myapplication.handler.login;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.METHOD)
-public @interface Confirm {
-    String value();
-    boolean showToast() default false;
+public @interface LoginRequest {
+
 }
