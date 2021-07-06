@@ -1,20 +1,10 @@
 plugins {
     id "java-library"
-    id "maven-publish"
     id "signing"
 }
 apply plugin: 'groovy'  //必须
 apply plugin: 'maven'  //要想发布到Maven，此插件必须使用
 
-task sourceJar(type: Jar) {
-    classifier "sources"
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier "javadoc"
-    from javadoc.destinationDir
-}
 
 javadoc {
     description = "生成jar格式的javadoc。"
@@ -37,31 +27,58 @@ javadoc {
     options.charSet = "UTF-8"
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            // The coordinates of the library, being set from variables that
-            // we'll set up in a moment
-            groupId = 'io.github.zhuguohui'
-            artifactId = 'method-interceptor'
-            version = '1.0.0'
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
 
-            artifact sourceJar
-            artifact javadocJar
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-            // Self-explanatory metadata for the most part
-            pom {
-                name = 'method-interceptor'
-                description = '使用asm实现的方法拦截框架'
-                // If your project has a dedicated site, use its URL here
-                url = 'https://github.com/zhuguohui/MehodInterceptor'
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+group = "io.github.zhuguohui"
+archivesBaseName = "method-interceptor"
+version = "1.0.1"
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            snapshotRepository(url: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom.project {
+                name "MethodInterceptor"
+                packaging 'jar'
+                description '通过asm动态修改java字节码，以达到方法拦截的目的'
+                url 'https://github.com/zhuguohui/MehodInterceptor'
+
+                scm {
+                    url 'https://github.com/qianyan/underscore.string.java'
+                    connection 'https://github.com/qianyan/underscore.string.java.git'
+                    developerConnection 'git@github.com:qianyan/underscore.string.java.git'
+                }
+
                 licenses {
                     license {
-                        //协议类型，一般默认Apache License2.0的话不用改：
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name 'MIT Licence'
+                        url 'https://raw.githubusercontent.com/qianyan/underscore.string.java/master/LICENSE'
+                        distribution 'repo'
                     }
                 }
+
                 developers {
                     developer {
                         id = 'zhuguohui'
@@ -69,53 +86,13 @@ publishing {
                         email = '287718603@qq.com'
                     }
                 }
-                // Version control info, if you're using GitHub, follow the format as seen here
-                scm {
-                    //修改成你的Git地址：
-                    connection = 'scm:git:github.com/zhuguohui/MehodInterceptor.git'
-                    developerConnection = 'scm:git:ssh://github.com/zhuguohui/MehodInterceptor.git'
-                    //分支地址：
-                    url = 'https://github.com/zhuguohui/MehodInterceptor/tree/master'
-                }
-                // A slightly hacky fix so that your POM will include any transitive dependencies
-                // that your library builds upon
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-
-                    project.configurations.implementation.allDependencies.each {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', it.group)
-                        dependencyNode.appendNode('artifactId', it.name)
-                        dependencyNode.appendNode('version', it.version)
-                    }
-                }
-            }
-        }
-    }
-    repositories {
-        // The repository to publish to, Sonatype/MavenCentral
-        maven {
-            // This is an arbitrary name, you may also use "mavencentral" or
-            // any other name that's descriptive for you
-            name = "mavencentral"
-
-            def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            // You only need this if you want to publish snapshots, otherwise just set the URL
-            // to the release repo directly
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
-            // The username and password we've fetched earlier
-            credentials {
-                username sonatypeUsername
-                password sonatypePassword
             }
         }
     }
 }
 
 signing {
-    sign publishing.publications
+    sign configurations.archives
 }
 
 dependencies {
