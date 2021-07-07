@@ -32,7 +32,7 @@ buildscript {
 
 在需要使用的module中如下配置即可
 
-```cpp
+```java
 
 apply plugin:"com.zhuguohui.methodinterceptor"
 
