@@ -11,7 +11,7 @@ MehodInterceptor是一个使用ASM来动态修改字节码，以达到方法拦�
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2021070716355187.gif)
 
-# 原理
+# 使用
 该框架已经发布到 mavenCentral()了。只需要在根目录的gradle集成。
 
 ```java
